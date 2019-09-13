@@ -1,6 +1,7 @@
 package com.registration.controller;
 
 import com.registration.dto.UserBO;
+import com.registration.model.SearchResultDTO;
 import com.registration.model.User;
 import com.registration.service.UserRegistrationService;
 import io.swagger.annotations.ApiOperation;
@@ -50,7 +51,7 @@ public class UserRegistrationController {
             @ApiResponse(code = 403, message = "forbidden!!!"),
             @ApiResponse(code = 404, message = "User not found!!!") })
     @GetMapping("/users")
-    public List<Object[]> getUsers(
+    public List<SearchResultDTO> getUsers(
             @ApiParam(value="column for which data are needed in comma separated, ex: firstName,lastName", example = "firstName,lastName") @RequestParam(required = false) List<String> columns,
             @ApiParam(value="page number for which data are needed, starting with 0", example = "0") @RequestParam(required = false) Integer pageNum,
             @ApiParam(value="records per page", example = "10") @RequestParam(required = false) Integer recPerPage) {
@@ -77,7 +78,7 @@ public class UserRegistrationController {
     @Transactional
     public ResponseEntity createUser(
             @ApiParam(value = "Request with user details", required = true) @Valid @RequestBody UserBO user){
-        regsitrationService.saveUser(dozerBeanMapper.map(user, User.class));
-        return new ResponseEntity(HttpStatus.CREATED);
+        User createdUser = regsitrationService.saveUser(dozerBeanMapper.map(user, User.class));
+        return ResponseEntity.ok(createdUser);
     }
 }

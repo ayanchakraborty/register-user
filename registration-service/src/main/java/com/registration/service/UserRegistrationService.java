@@ -3,6 +3,7 @@ package com.registration.service;
 import com.registration.dao.RegistrationDao;
 import com.registration.exception.RegistrationException;
 import com.registration.exception.ResourceNotFoundException;
+import com.registration.model.SearchResultDTO;
 import com.registration.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,7 +24,7 @@ public class UserRegistrationService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id" , userId));
     }
 
-    public List<Object[]> getUsers(List<String> columns, int pageNum, int numRecordsPerPage){
+    public List<SearchResultDTO> getUsers(List<String> columns, int pageNum, int numRecordsPerPage){
         return registrationDao.getUsers(columns, pageNum, numRecordsPerPage);
     }
 
@@ -46,13 +47,5 @@ public class UserRegistrationService {
         StringBuilder sb = new StringBuilder();
         sb.append("User creation failed. ").append(ex.getMessage());
         return sb.toString();
-    }
-
-    /**
-     * This setter method should be used only by unit tests.
-     * @param registrationDao
-     */
-    public void setRegistrationDao(RegistrationDao registrationDao) {
-        this.registrationDao = registrationDao;
     }
 }

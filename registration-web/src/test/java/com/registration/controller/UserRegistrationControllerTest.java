@@ -1,87 +1,83 @@
 package com.registration.controller;
 
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.hamcrest.CoreMatchers.is;
-import static org.mockito.Mockito.*;
-
 import com.registration.dto.UserBO;
+import com.registration.model.SearchResultDTO;
 import com.registration.model.User;
 import com.registration.service.UserRegistrationService;
 import org.dozer.Mapper;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
 public class UserRegistrationControllerTest {
 
     private static final Long USER_ID = 12345678L;
+    private User user;
 
-    private MockMvc mockMvc;
+    @org.junit.Rule
+    public final JUnitRuleMockery mockery = new JUnitRuleMockery(){
+        {
+            setImposteriser(ClassImposteriser.INSTANCE);
+        }
+    };
 
-    @Mock
-    private UserRegistrationService regsitrationService;
-
-    @Mock
-    private Mapper mapperMock;
-
-    @InjectMocks
     private UserRegistrationController controller;
+
+    @Before
+    public void setUp() {
+        controller = new UserRegistrationController();
+        controller.dozerBeanMapper = mockery.mock(Mapper.class);
+        controller.regsitrationService = mockery.mock(UserRegistrationService.class);
+    }
 
     @Test
     public void getUserByUserId(){
         User user = new User();
-        given(regsitrationService.getUser(new Long(12345))).willReturn(user);
-
         UserBO convertedUser = new UserBO();
-        given(mapperMock.map(user, UserBO.class)).willReturn(convertedUser);
-
-        UserBO resultUser = controller.getUser(new Long(12345));
-
-        assertThat(resultUser, is(convertedUser));
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(controller.regsitrationService).getUser(1L);
+                will(returnValue(user));
+                oneOf(controller.dozerBeanMapper).map(user, UserBO.class);
+                will(returnValue(convertedUser));
+            }
+        });
+        controller.getUser(1L);
     }
 
     @Test
     public void createUser(){
-        UserBO userRequest = new UserBO();
-        ResponseEntity responseEntity = controller.createUser(userRequest);
-        assertThat("Returned response code must be Accepted", responseEntity.getStatusCode(), is(HttpStatus.CREATED));
+        UserBO receivedUser = new UserBO();
+        User convertedUser = new User();
+        mockery.checking(new Expectations(){
+            {
+                oneOf(controller.dozerBeanMapper).map(receivedUser, User.class);
+                will(returnValue(convertedUser));
+                oneOf(controller.regsitrationService).saveUser(convertedUser);
+                will(returnValue(user));
+            }
+        });
+        controller.createUser(receivedUser);
     }
 
     @Test
     public void getUsersWithParameters() {
-        List<Object[]> results = mockUsersList();
-        List<String> columns = Arrays.asList("firstName","lastName");
-        int pageNum = 0;
-        int recPerPage = 5;
-        when(controller.getUsers(columns, pageNum, recPerPage)).thenReturn(results);
-        assertThat("Incorrect Resultsize", results.size(), is(5));
-    }
+        List<SearchResultDTO> resultDTOs = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
 
-    private List<Object[]> mockUsersList(){
-        List<Object[]> users = new ArrayList<>();
-        Object[] user1 = new Object[]{"A", "B"};
-        Object[] user2 = new Object[]{"C", "D"};
-        Object[] user3 = new Object[]{"E", "F"};
-        Object[] user4 = new Object[]{"G", "H"};
-        Object[] user5 = new Object[]{"I", "J"};
-        users.add(user1);
-        users.add(user2);
-        users.add(user3);
-        users.add(user4);
-        users.add(user5);
-
-        return users;
+        mockery.checking(new Expectations()
+        {
+            {
+                oneOf(controller.regsitrationService).getUsers(columns,0,5);
+                will(returnValue(resultDTOs));
+            }
+        });
+        controller.getUsers(columns,0,5);
     }
 }

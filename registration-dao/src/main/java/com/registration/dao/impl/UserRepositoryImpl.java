@@ -1,13 +1,15 @@
 package com.registration.dao.impl;
 
 import com.registration.dao.UserRepository;
-import com.registration.model.User;
+import com.registration.model.SearchResultDTO;
 import org.springframework.util.CollectionUtils;
 
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
+import javax.persistence.Tuple;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class UserRepositoryImpl implements UserRepository {
 
@@ -15,10 +17,10 @@ public class UserRepositoryImpl implements UserRepository {
     private static final int DEFAULT_MAX_REC_PER_PAGE = 10;
 
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Override
-    public List<Object[]> getUsers(List<String> columnList, int pageNum, int numRecordsPerPage){
+    public List<SearchResultDTO> getUsers(List<String> columnList, int pageNum, int numRecordsPerPage){
         int firstResult = DEFAULT_FIRST_RESULT_INDEX;
         int maxResult = DEFAULT_MAX_REC_PER_PAGE;
         if(pageNum < 0){
@@ -41,9 +43,24 @@ public class UserRepositoryImpl implements UserRepository {
                                     .append(" from User u")
                                     .toString();
 
-        return entityManager.createQuery(query)
-                .setFirstResult(firstResult)
-                .setMaxResults(maxResult)
-                .getResultList();
+       List<Tuple> resultSet = entityManager.createQuery(query, Tuple.class)
+                                    .setFirstResult(firstResult)
+                                    .setMaxResults(maxResult)
+                                    .getResultList();
+       List<SearchResultDTO> resultDTOs = new ArrayList<>();
+
+       resultSet.stream().forEach(result -> {
+                    SearchResultDTO resultDTO = new SearchResultDTO();
+                    resultDTO.setValues(new ArrayList<Map<String,Object>>());
+                    IntStream.range(0,columnList.size())
+                        .forEach(index -> {
+                            Map<String,Object> data = new HashMap();
+                            data.put(columnList.get(index), result.get(index));
+                            resultDTO.getValues().add(data);
+                        });
+                    resultDTOs.add(resultDTO);
+                });
+
+       return resultDTOs;
     }
 }

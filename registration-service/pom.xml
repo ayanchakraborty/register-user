@@ -14,6 +14,26 @@
 
     <dependencies>
         <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>${cglib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-junit4</artifactId>
+            <version>${jmock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock</artifactId>
+            <version>${jmock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmock</groupId>
+            <artifactId>jmock-legacy</artifactId>
+            <version>${jmock.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.registration</groupId>
             <artifactId>registration-model</artifactId>
             <version>${project.version}</version>
