@@ -1,0 +1,26 @@
+version: "3"
+services:
+  user-registration:
+    image: ayanchakraborty/user-registration:0.0.1-SNAPSHOT
+    ports:
+      - "8080:8080"
+    networks:
+      - user-registration-mysql
+    depends_on:
+      - user-mysqldb
+    environment:
+      WAIT_HOSTS: user-mysqldb:3306
+      WAIT_HOSTS_TIMEOUT: 300
+
+  user-mysqldb:
+    image: ayanchakraborty/user-mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - user-registration-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password123
+      - MYSQL_DATABASE=user
+
+networks:
+  user-registration-mysql:
