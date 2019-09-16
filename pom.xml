@@ -23,6 +23,7 @@
 		<bdd.mockito.version>3.0.0</bdd.mockito.version>
 		<jmock.version>2.8.1</jmock.version>
         <cglib.version>3.3.0</cglib.version>
+		<h2.db.version>1.4.194</h2.db.version>
 	</properties>
 
 	<dependencies>

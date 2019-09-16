@@ -51,12 +51,10 @@ public class UserRepositoryImpl implements UserRepository {
 
        resultSet.stream().forEach(result -> {
                     SearchResultDTO resultDTO = new SearchResultDTO();
-                    resultDTO.setValues(new ArrayList<Map<String,Object>>());
+                    resultDTO.setValues(new HashMap<String,Object>());
                     IntStream.range(0,columnList.size())
                         .forEach(index -> {
-                            Map<String,Object> data = new HashMap();
-                            data.put(columnList.get(index), result.get(index));
-                            resultDTO.getValues().add(data);
+                            resultDTO.getValues().put(columnList.get(index), result.get(index));
                         });
                     resultDTOs.add(resultDTO);
                 });
