@@ -10,17 +10,18 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.dozer.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class UserRegistrationController {
@@ -77,7 +78,19 @@ public class UserRegistrationController {
     @PostMapping(path = "/createuser", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ResponseEntity createUser(
-            @ApiParam(value = "Request with user details", required = true) @Valid @RequestBody UserBO user){
+            @ApiParam(value = "Request with user details", required = true) @Valid @RequestBody UserBO user,
+            Errors errors){
+        if (errors.hasErrors()) {
+            StringBuilder result = new StringBuilder();
+            // get all errors
+            result.append(errors.getAllErrors()
+                    .stream()
+                    .map(x -> x.getDefaultMessage())
+                    .collect(Collectors.joining(" , ")));
+
+            return ResponseEntity.badRequest().body(result);
+        }
+
         User createdUser = regsitrationService.saveUser(dozerBeanMapper.map(user, User.class));
         return ResponseEntity.ok(createdUser);
     }

@@ -10,6 +10,8 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public class UserRegistrationControllerTest {
 
     private static final Long USER_ID = 12345678L;
     private User user;
+    private Errors errors;
 
     @org.junit.Rule
     public final JUnitRuleMockery mockery = new JUnitRuleMockery(){
@@ -33,6 +36,7 @@ public class UserRegistrationControllerTest {
         controller = new UserRegistrationController();
         controller.dozerBeanMapper = mockery.mock(Mapper.class);
         controller.regsitrationService = mockery.mock(UserRegistrationService.class);
+        errors = new BindException("", "test");
     }
 
     @Test
@@ -63,7 +67,7 @@ public class UserRegistrationControllerTest {
                 will(returnValue(user));
             }
         });
-        controller.createUser(receivedUser);
+        controller.createUser(receivedUser, errors);
     }
 
     @Test
